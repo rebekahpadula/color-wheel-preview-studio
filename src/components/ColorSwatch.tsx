@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useColors } from "@/context/ColorContext";
@@ -26,6 +27,10 @@ const ColorSwatch: React.FC<ColorSwatchProps> = ({ label, colorKey }) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+
+    // Set explicit dimensions to ensure canvas is visible
+    canvas.width = 200;
+    canvas.height = 200;
 
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
@@ -156,19 +161,22 @@ const ColorSwatch: React.FC<ColorSwatchProps> = ({ label, colorKey }) => {
         </PopoverTrigger>
         <PopoverContent className="w-auto p-4">
           <div className="text-sm font-medium mb-2">Select a color for {label}</div>
-          <canvas 
-            ref={canvasRef} 
-            width="200" 
-            height="200" 
-            onClick={handleColorSelect}
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onMouseMove={handleMouseMove}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-            onTouchMove={handleTouchMove}
-            className="cursor-crosshair"
-          />
+          <div className="relative">
+            <canvas 
+              ref={canvasRef} 
+              width="200" 
+              height="200" 
+              onClick={handleColorSelect}
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              onMouseMove={handleMouseMove}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              onTouchMove={handleTouchMove}
+              className="cursor-crosshair border border-gray-200 rounded"
+              style={{ display: "block" }}
+            />
+          </div>
           <div className="flex justify-between items-center mt-2">
             <div
               className="w-8 h-8 rounded border border-gray-300"
