@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useColors } from "@/context/ColorContext";
@@ -45,33 +44,31 @@ const ColorSwatch: React.FC<ColorSwatchProps> = ({ label, colorKey }) => {
       ctx.arc(centerX, centerY, radius, startAngle, endAngle);
       ctx.closePath();
 
-      // Hue is the angle, saturation is 100%, lightness varies from 0% to 100%
-      const gradientColors = [];
-      for (let i = 0; i <= 10; i++) {
-        gradientColors.push({ 
-          offset: i / 10, 
-          color: `hsl(${angle}, 100%, ${i < 5 ? i * 10 : 90 - (i - 5) * 10}%)`
-        });
-      }
-
+      // For each angle, create a gradient from center to edge
       const gradient = ctx.createRadialGradient(
         centerX, centerY, 0,
         centerX, centerY, radius
       );
 
-      gradientColors.forEach(({ offset, color }) => {
-        gradient.addColorStop(offset, color);
-      });
+      // Add color stops for the gradient
+      // White at center
+      gradient.addColorStop(0, '#FFFFFF');
+      // Full saturation color at middle
+      gradient.addColorStop(0.5, `hsl(${angle}, 100%, 50%)`);
+      // Black at edge
+      gradient.addColorStop(1, '#000000');
 
       ctx.fillStyle = gradient;
       ctx.fill();
     }
 
-    // Draw white center
+    // Draw center white circle
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius * 0.1, 0, 2 * Math.PI);
     ctx.fillStyle = "white";
     ctx.fill();
+    ctx.strokeStyle = "#ccc";
+    ctx.stroke();
 
   }, [isOpen]);
 

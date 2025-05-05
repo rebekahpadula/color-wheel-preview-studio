@@ -1,7 +1,6 @@
 
 import React from "react";
 import { useColors } from "@/context/ColorContext";
-import { cog } from "lucide-react";
 
 const PreviewSVG: React.FC = () => {
   const { pendingColors, logoUrl } = useColors();
