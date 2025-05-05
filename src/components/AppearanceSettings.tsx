@@ -23,6 +23,15 @@ const AppearanceSettings: React.FC = () => {
   const { toast } = useToast();
 
   const handleApplyColors = () => {
+    if (hasLowContrast()) {
+      // Show warning toast but still apply colors
+      toast({
+        title: "Low contrast warning",
+        description: "The selected colors have low contrast and may be difficult to read for some users",
+        variant: "destructive"
+      });
+    }
+    
     applyColors();
     toast({
       title: "Colors saved",
@@ -111,9 +120,10 @@ const AppearanceSettings: React.FC = () => {
           {hasLowContrast() && (
             <Alert variant="destructive" className="mb-4 bg-orange-50 border-orange-200">
               <AlertTriangle className="h-4 w-4 text-orange-600" />
-              <AlertTitle className="text-orange-800">Warning</AlertTitle>
+              <AlertTitle className="text-orange-800">Low Contrast Warning</AlertTitle>
               <AlertDescription className="text-orange-700">
-                The background color needs more contrast with the text and primary colors.
+                The background color needs more contrast with the text and primary colors for WCAG AA compliance. 
+                You can still apply these colors, but they may be difficult to read for some users.
               </AlertDescription>
             </Alert>
           )}
