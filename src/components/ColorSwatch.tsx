@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useColors } from "@/context/ColorContext";
 
@@ -8,146 +8,27 @@ interface ColorSwatchProps {
   colorKey: "text" | "background" | "primary" | "secondary" | "important";
 }
 
+const PREDEFINED_COLORS = [
+  '#A00505', '#BA690B', '#BAB26C', '#329D0C', '#06A7B1', '#005DB4', '#310393', '#9B0079', '#000000',
+  '#EC0C0C', '#FB8C0A', '#F8E007', '#4EF314', '#0DE1EF', '#0A83F3', '#5307F4', '#E80FB8', '#5A5A5A',
+  '#FF7C7C', '#FFBC6D', '#FFF38B', '#B9FFA0', '#90F8FF', '#7BC0FF', '#A175FF', '#FF82E3', '#CECECE',
+  '#FFBFBF', '#FFE1BE', '#FFFBD4', '#E2FFD8', '#D7FDFF', '#C3E2FF', '#E5D9FF', '#FFDCF7', '#FFFFFF'
+];
+
 const ColorSwatch: React.FC<ColorSwatchProps> = ({ label, colorKey }) => {
   const { pendingColors, updateColor } = useColors();
   const [isOpen, setIsOpen] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selectedColor, setSelectedColor] = useState(pendingColors[colorKey]);
-  const [isDragging, setIsDragging] = useState(false);
 
   // Update local state when pendingColors change externally
-  useEffect(() => {
+  React.useEffect(() => {
     setSelectedColor(pendingColors[colorKey]);
   }, [pendingColors, colorKey]);
 
-  // Draw the color wheel when component mounts or when popover opens
-  useEffect(() => {
-    if (!isOpen || !canvasRef.current) return;
-    
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Set explicit dimensions to ensure canvas is visible
-    canvas.width = 200;
-    canvas.height = 200;
-
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const radius = Math.min(centerX, centerY) - 5;
-
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw color wheel
-    for (let angle = 0; angle < 360; angle++) {
-      const startAngle = (angle - 1) * Math.PI / 180;
-      const endAngle = (angle + 1) * Math.PI / 180;
-
-      ctx.beginPath();
-      ctx.moveTo(centerX, centerY);
-      ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-      ctx.closePath();
-
-      // For each angle, create a gradient from center to edge
-      const gradient = ctx.createRadialGradient(
-        centerX, centerY, 0,
-        centerX, centerY, radius
-      );
-
-      // Add color stops for the gradient
-      // White at center
-      gradient.addColorStop(0, '#FFFFFF');
-      // Full saturation color at middle
-      gradient.addColorStop(0.5, `hsl(${angle}, 100%, 50%)`);
-      // Black at edge
-      gradient.addColorStop(1, '#000000');
-
-      ctx.fillStyle = gradient;
-      ctx.fill();
-    }
-
-    // Draw center white circle
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius * 0.1, 0, 2 * Math.PI);
-    ctx.fillStyle = "white";
-    ctx.fill();
-    ctx.strokeStyle = "#ccc";
-    ctx.stroke();
-
-  }, [isOpen]);
-
-  const handleColorSelect = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (!canvasRef.current) return;
-    
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    
-    // Get position based on event type
-    let clientX, clientY;
-    if ('touches' in e) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
-
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-    
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    
-    const pixelData = ctx.getImageData(x, y, 1, 1).data;
-    const color = `#${pixelData[0].toString(16).padStart(2, '0')}${pixelData[1].toString(16).padStart(2, '0')}${pixelData[2].toString(16).padStart(2, '0')}`;
-    
+  const handleColorSelect = (color: string) => {
     setSelectedColor(color);
     updateColor(colorKey, color);
   };
-
-  const handleMouseDown = () => {
-    setIsDragging(true);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (isDragging) {
-      handleColorSelect(e);
-    }
-  };
-
-  // Similar handlers for touch events
-  const handleTouchStart = () => {
-    setIsDragging(true);
-  };
-
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (isDragging) {
-      handleColorSelect(e);
-    }
-  };
-
-  useEffect(() => {
-    const handleGlobalMouseUp = () => {
-      setIsDragging(false);
-    };
-
-    window.addEventListener('mouseup', handleGlobalMouseUp);
-    window.addEventListener('touchend', handleGlobalMouseUp);
-
-    return () => {
-      window.removeEventListener('mouseup', handleGlobalMouseUp);
-      window.removeEventListener('touchend', handleGlobalMouseUp);
-    };
-  }, []);
 
   return (
     <div className="flex items-center py-2">
@@ -159,23 +40,18 @@ const ColorSwatch: React.FC<ColorSwatchProps> = ({ label, colorKey }) => {
             aria-label={`Pick ${label} color`}
           />
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-4">
+        <PopoverContent className="w-[272px] p-4"> {/* Width to fit 9 colors per row */}
           <div className="text-sm font-medium mb-2">Select a color for {label}</div>
-          <div className="relative">
-            <canvas 
-              ref={canvasRef} 
-              width="200" 
-              height="200" 
-              onClick={handleColorSelect}
-              onMouseDown={handleMouseDown}
-              onMouseUp={handleMouseUp}
-              onMouseMove={handleMouseMove}
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-              onTouchMove={handleTouchMove}
-              className="cursor-crosshair border border-gray-200 rounded"
-              style={{ display: "block" }}
-            />
+          <div className="grid grid-cols-9 gap-1">
+            {PREDEFINED_COLORS.map((color, index) => (
+              <button
+                key={index}
+                className="w-6 h-6 rounded border border-gray-200 hover:border-gray-400 transition-colors"
+                style={{ backgroundColor: color }}
+                onClick={() => handleColorSelect(color)}
+                aria-label={`Select color ${color}`}
+              />
+            ))}
           </div>
           <div className="flex justify-between items-center mt-2">
             <div
