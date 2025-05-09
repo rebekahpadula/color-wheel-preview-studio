@@ -117,16 +117,21 @@ const AppearanceSettings: React.FC = () => {
         <section className="mb-8">
           <h2 className={`text-xl font-medium mb-4 ${fontClass}`}>Colors</h2>
           
-          {hasLowContrast() && (
-            <Alert variant="destructive" className="mb-4 bg-orange-50 border-orange-200">
-              <AlertTriangle className="h-4 w-4 text-orange-600" />
-              <AlertTitle className="text-orange-800">Low Contrast Warning</AlertTitle>
-              <AlertDescription className="text-orange-700">
-                The background color needs more contrast with the text and primary colors for WCAG AA compliance. 
-                You can still apply these colors, but they may be difficult to read for some users.
-              </AlertDescription>
-            </Alert>
-          )}
+          <div className="min-h-[96px] relative">
+            {hasLowContrast() && (
+              <Alert 
+                variant="destructive" 
+                className="mb-4 bg-orange-50 border-orange-200 animate-in fade-in slide-in-from-top-1 duration-300"
+              >
+                <AlertTriangle className="h-4 w-4 text-orange-600" />
+                <AlertTitle className="text-orange-800">Low Contrast Warning</AlertTitle>
+                <AlertDescription className="text-orange-700">
+                  The background color needs more contrast with the text and primary colors for WCAG AA compliance. 
+                  You can still apply these colors, but they may be difficult to read for some users.
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
